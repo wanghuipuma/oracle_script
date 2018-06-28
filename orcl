@@ -1,0 +1,141 @@
+define co_cd='MC';
+select * from CTmar where co_cd=&code;
+select co_cd || '  ' || trans_cd from ctmar;
+select concat( co_cd,trans_cd) from ctmar;
+select sysdate, sysdate+1 from ctmar;
+select sysdate, sysdate+1/24 from ctmar;
+select sysdate, to_char(sysdate,'yyyy/mm/dd hh24:mi:ss') from ctmar;
+select sysdate, to_char(sysdate,'yyyy/mm/dd hh12:mi:ss am') from ctmar;
+
+select sysdate, to_char(sysdate,'yyyy/mm/dd hh24:mi:ss'), to_char(sysdate+1/24,'yyyy/mm/dd hh24:mi:ss') from ctmar;
+select months_between('12-JUL-73','12-AUG-73') from ctmar;
+select sysdate, add_months(sysdate,1) from ctmar;
+select sysdate, next_day(sysdate,'Friday') from ctmar;
+select sysdate, last_day(sysdate) from ctmar;
+select sysdate, trunc(sysdate,'month') from ctmar;
+select sysdate, trunc(sysdate,'year') from ctmar;
+select sysdate, trunc(sysdate,'month'),trunc(sysdate,'year'), trunc(sysdate,'day') from ctmar;
+select to_date('25-Jul-03','yyyy/mm/dd'),trunc(to_date('25-Jul-03','yyyy/mm/dd')) from ctmar;
+select sysdate, to_char(sysdate,'dd-mm-yyyy') from ctmar;
+select to_char(12345.34,'$999999.000') from ctmar;
+create table  newtable as select * from ctmar;
+select * from newtable1;
+
+desc NEWTABLE1
+drop table NEWTABLE1;
+create table newtable1 (id number(5), Hdate timestamp default sysdate);
+insert into newtable1 values (1,sysdate);
+--rollback---
+insert into newtable values('cc','cc','cc',0);
+commit;
+delete from newtable;
+rollback;
+--savepoint,rollbcak
+insert into newtable values('cc','cc','cc',0);
+savepoint insert_one;
+insert into newtable values('cc','cc','cc',0);
+rollback to savepoint insert_one;
+--constraint,not null,unique,primary key, foreign key,check
+drop table NEWTABLE1;
+create table newtable1 (id number(5)primary key, Hdate timestamp default sysdate);
+desc newtable1;
+
+create table newtable1 (id number(5) constraint id_pk primary key, Hdate timestamp default sysdate);
+
+create table newtable1 (id number(5)primary key, Hdate timestamp default sysdate, sale number(8,2) check(sale>=0));
+--alter table  to read-only
+alter table newtable1 read only;
+
+--bulk inert into table
+create table newtable2 as select * from CTmar;
+desc newtable2;
+--create view
+create view newtable3 as select * from CTmar;
+select * from newtable3;
+
+create or replace view newtable3 as select co_cd,trans_cd,payor_cd_cur, abs(total_trans) as trans_amt from CTmar;
+
+create or replace view newtable4 as select co_cd,trans_cd,payor_cd_cur, abs(total_trans) as trans_amt from CTmar with read only;
+desc newtable4;
+
+select count(*) from newtable3;
+set timming on;
+select * from newtable3 where rownum=1;
+set timming off;
+
+--sequence
+create sequence sq_test 
+start with 1 
+increment by 1;
+create table newtable11 (id number(5));
+desc newtable1;
+insert into newtable11 values(sq_test.nextval);
+select sq_test.currval from newtable11;
+
+--index
+
+select * from newtable3;
+create index payor_idx1 on ctmar(payor_cd_cur);
+select * from CTmar;
+drop index payor_idx;
+drop index payor_idx1;
+--privilege
+create user wangh4
+identified by hui8wang;
+grant create table,create view 
+to wangh4;
+create role team;
+grant create session to team;
+create user member1 identified by remb;
+create user member2 identified by remb;
+
+grant team to member1,member2;
+grant select
+on ctmar
+to wangh4
+with grant option;
+
+
+grant select 
+on ctmar
+to public;
+
+revoke select 
+on ctmar
+from wangh4; 
+--constraint
+desc user_constraints
+select constraint_name,table_name,constraint_type from user_constraints;
+
+select * from user_constraints where constraint_type='R';
+
+select f.constraint_name "FK",f.constraint_type, p.constraint_name as "PK" 
+from user_constraints f
+  inner join user_constraints p
+    on f.constraint_name=p.constraint_name 
+  where f.constraint_type='R';
+--data dictionary
+select  owner,table_name from all_tables;
+select table_name from user_tables;
+select owner, table_name from dba_tables;
+
+--pl-sql, anonymous block
+begin
+dbms_outpt.put_line('Hello World');
+end;
+
+declare
+v_number number;
+begin
+  v_number:=1;
+  DBMS_OUTPUT.PUT_LINE('My value is: '|| v_number);
+  end;
+show error;
+CREATE OR REPLACE PROCEDURE 
+hello_world
+IS
+  l_message
+  VARCHAR2 (100) := 'Hello World!';
+BEGIN
+  DBMS_OUTPUT.put_line (l_message);
+END hello_world;
